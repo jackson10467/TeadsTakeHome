@@ -13,7 +13,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: #f0f0f0;
+      background-color: #ffffff;
       flex-direction: column;
     }
     button {
@@ -43,6 +43,7 @@ let originalPosts = null;
 let rejectedPosts = [];
 let approvedPosts = [];
 let pendingPosts = [];
+let finalOutput = [];
 
 function getPosts(event) {
   fetch('https://jsonplaceholder.typicode.com/posts/')
@@ -53,22 +54,45 @@ function getPosts(event) {
       return response.json();
     })
     .then(posts => {
-      alert('Fetched data:' + JSON.stringify(posts, null, 2));
       originalPosts = posts
-      // filters the posts id based on if they're divisible by 2, 3 or a prime number
+
+      // filters the posts id based on if they're divisible by 2, 3 or divisible by both, or neither.
       approvedPosts = originalPosts.filter(post => post.id % 2 === 0);
       rejectedPosts = originalPosts.filter(post => post.id % 3 === 0);
-      pendingPosts = originalPosts.filter(post => post.id  % 2 !== 0 && post.id % 3 !== 0)  
-      
-      console.log("Original posts:", originalPosts);
-      
+      pendingPosts = originalPosts.filter(post => post.id  % 2 !== 0 && post.id % 3 !== 0 || post.id  % 2 === 0 && post.id % 3 === 0); 
+
+      // Maps through each array, adding the approved, rejected, or pending status
+      // also changing the rejected posts titles to uppercase
       approvedPosts = approvedPosts.map(obj => ({ ...obj, status: 'approved' }));
-      rejectedPosts = rejectedPosts.map(obj => ({ ...obj, status: 'rejected' }));  
+      rejectedPosts = rejectedPosts.map(obj => ({ ...obj, title: obj.title.toUpperCase(), status: 'rejected' }));  
       pendingPosts  = pendingPosts.map(obj => ({ ...obj, status: 'pending' }));
 
+      // adds all edited posts to final output array, 
+      // note: this solution includes duplicates as some numbers are divisible by both 2 and 3, for example 6, this would show up in all 3 arrays.
+      finalOutput = approvedPosts.concat(rejectedPosts, pendingPosts);
+
+      // Solution below maps through the original array conditionally, adding a status based on what it is divisible by, else mark as pending
+      // This solution does not have duplicates.
+    
+      //  finalOutput = originalPosts.map(obj => {
+    //     if (obj.id % 3 === 0) {
+    //         return { ...obj, title: obj.title.toUpperCase(), status: 'rejected' };
+    //     } 
+    //     else if (obj.id % 2 === 0) {
+    //         return { ...obj, status: 'approved' };
+    //     } 
+    //     else {
+    //         return { ...obj, status: 'pending' };
+    //     }
+    // });
+      
+    // output to console
+      console.log("Original posts:", originalPosts);
       console.log("Approved Posts:", approvedPosts);
       console.log("Rejected Posts:", rejectedPosts);
       console.log("Pending Posts:", pendingPosts);
+      console.log("final output:", finalOutput);
+
     })
     .catch(error => {
       alert('Error: ' + error.message);
