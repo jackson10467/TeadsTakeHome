@@ -55,16 +55,20 @@ function getPosts(event) {
     .then(posts => {
       alert('Fetched data:' + JSON.stringify(posts, null, 2));
       originalPosts = posts
-      
+      // filters the posts id based on if they're divisible by 2, 3 or a prime number
       approvedPosts = originalPosts.filter(post => post.id % 2 === 0);
       rejectedPosts = originalPosts.filter(post => post.id % 3 === 0);
       pendingPosts = originalPosts.filter(post => post.id  % 2 !== 0 && post.id % 3 !== 0)  
       
       console.log("Original posts:", originalPosts);
+      
+      approvedPosts = approvedPosts.map(obj => ({ ...obj, status: 'approved' }));
+      rejectedPosts = rejectedPosts.map(obj => ({ ...obj, status: 'rejected' }));  
+      pendingPosts  = pendingPosts.map(obj => ({ ...obj, status: 'pending' }));
+
       console.log("Approved Posts:", approvedPosts);
       console.log("Rejected Posts:", rejectedPosts);
       console.log("Pending Posts:", pendingPosts);
-      document.getElementById("Posts").textContent = originalPosts[0].title;
     })
     .catch(error => {
       alert('Error: ' + error.message);
